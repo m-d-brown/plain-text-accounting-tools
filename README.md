@@ -16,6 +16,10 @@ credentials. With PDF statements, my banks and credit card providers email me
 monthly and I can then check the original source statement, account them and
 file away with minimal overhead.
 
+My other project, https://github.com/m-d-brown/beancount-basics, has
+more information about Beancount, with links to many better resources to
+get started with it and double entry accounting.
+
 The following institutions are supported:
 
 * Bank of America credit cards
