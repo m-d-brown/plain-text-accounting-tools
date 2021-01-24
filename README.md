@@ -34,7 +34,7 @@ Beancount regression test PDF files are created by running `pdftotext` on
 original statements, anonymizing the produced text, then printing to a PDF:
 
 ```console
-% pdftotext -raw ~/Downloads/eStmt_2021-01-04.pdf > \
+% pdftotext -raw ~/Downloads/eStmt_2021-01-04.pdf >
     financial-pdf-parsing/raw_test_data/eStmt_2021-01-04.txt
 
 # Edit raw to anonymize values
@@ -42,4 +42,8 @@ original statements, anonymizing the produced text, then printing to a PDF:
 
 # Open raw in Chrome and print to PDF to
 # financial-pdf-parsing/financial_pdf_parsing/importer_regression/eStmt_2021-01-04.pdf
+
+# Regnerate regression test output files and view changes.
+% pytest --generate
+% git diff
 ```
