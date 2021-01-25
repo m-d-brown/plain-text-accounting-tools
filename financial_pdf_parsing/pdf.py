@@ -8,6 +8,7 @@ from beancount.core import number
 
 NEGATIVE_ONE = number.D("-1")
 
+# TODO: Move this to a Beancount-specific common library.
 def InvertAmount(amt):
     return amount.mul(amt, NEGATIVE_ONE)
 
