@@ -1,3 +1,4 @@
+import collections
 import datetime
 import re
 
@@ -12,33 +13,63 @@ from financial_pdf_parsing import pdf
 
 FILE_PATTERN =  r'^eStmt_.*\.pdf$'
 
+
+Transaction = collections.namedtuple('Transaction', 'date descr amount')
+
+class BeancountLedgerItems:
+    def __init__(self, filename):
+        self.items = []
+        self.filename = filename
+
+    def _metadata(self):
+        return data.new_metadata(self.filename, len(self.items))
+
+    def AddTransactions(self, account, txns):
+        for t in txns:
+            postings = [data.Posting(account, t.amount, None, None, None, None)]
+            self.items.append(data.Transaction(
+                meta=self._metadata(),
+                date=t.date,
+                flag=flags.FLAG_OKAY,
+                payee=None,
+                narration=t.descr,
+                tags=set(),
+                links=set(),
+                postings=postings,
+            ))
+
+    def AddBalance(self, account, closing_date, balance):
+        self.items.append(data.Balance(
+            self._metadata(),
+            closing_date + datetime.timedelta(days=1),
+            account, balance, None, None))
+
 def compileRE(pattern):
     return re.compile(pattern, re.DOTALL)
 
-AMOUNT = r'-?\$?[0-9,]+\.[0-9]{1,2}'
+def reduceSingleMatch(pattern, parser, text):
+    pattern = compileRE(pattern)
 
-BALANCE_RE = compileRE(r'\bNew Balance Total +('+AMOUNT+r')\b')
-
-CLOSE_DATE_RE = compileRE(r'\bStatement Closing Date (\d+/\d+/\d+)\b')
-
-# Example:  12/05 12/07 WHOLE FOODS #1234 SF CA 8538 3456 251.49
-TRANSACTION_RE = compileRE(r'\b(\d{2}/\d{2}) \d{2}/\d{2} (.*?) \d+ \d+ ('+AMOUNT+r')\b')
-
-def reduceMatches(pattern, text, match_transform):
     results = set()
     for match in pattern.finditer(text):
-        r = match_transform(match)
+        r = parser(match)
         results.add(r)
+
+    if len(results) == 0:
+        raise ValueError(f'{parser.__name__}: found no matches')
+    if len(results) > 1:
+        raise ValueError(f'{parser.__name__}: found more than one match: {results}')
+    return results.pop()
+
+def parseAll(pattern, parser, text):
+    pattern = compileRE(pattern)
+    results = []
+    for match in pattern.finditer(text):
+        t = parser(match)
+        results.append(t)
     return results
 
-def reduceSingleMatch(pattern, text, match_transform):
-    results = reduceMatches(pattern, text, match_transform)
-    if len(results) == 0:
-        raise ValueError('found no balance')
-    if len(results) > 1:
-        raise ValueError(f'found more than one balance: {results}')
-    return results.pop()
-        
+AMOUNT = r'-?\$?[0-9,]+\.[0-9]{1,2}'
 
 def Read(filename, account):
     """Reads the PDF at filename and returns a list of Beancount transactions.
@@ -48,46 +79,32 @@ def Read(filename, account):
     """
     contents = pdf.PDFToText(filename)
 
-    def balanceTransform(m):
-        b = pdf.ParseAmount(m.group(1))
-        # We are treating as a liability so invert.
-        return pdf.InvertAmount(b)
-    balance = reduceSingleMatch(BALANCE_RE, contents, balanceTransform)
+    def _balance(match):
+        b = pdf.ParseAmount(match.group(1))
+        return pdf.InvertAmount(b) # Treat as liability
+    balance = reduceSingleMatch(
+            r'\bNew Balance Total +('+AMOUNT+r')\b',
+            _balance, contents)
 
-    def closeDateTransform(m):
-        return parser.parse(m.group(1)).date()
-    closing_date = reduceSingleMatch(CLOSE_DATE_RE, contents, closeDateTransform)
+    def _closing(match):
+        return parser.parse(match.group(1)).date()
+    closing_date = reduceSingleMatch(
+            r'\bStatement Closing Date (\d+/\d+/\d+)\b',
+            _closing, contents)
 
-    transactions = []
-    def txnTransform(m):
-        date = parser.parse(m.group(1)).date()
+    def _transaction(match):
+        date = parser.parse(match.group(1)).date()
         date = pdf.AdjustDateForYearBoundary(date, closing_date)
-        descr = m.group(2)
-        amt = pdf.ParseAmount(m.group(3))
-        # We are treating as a liability so invert.
-        amt = pdf.InvertAmount(amt)
+        descr = match.group(2)
+        amt = pdf.ParseAmount(match.group(3))
+        amt = pdf.InvertAmount(amt) # Treat as liability
+        return Transaction(date, descr, amt)
+    transactions = parseAll(
+            # Example:  12/05 12/07 WHOLE FOODS #1234 SF CA 8538 3456 251.49
+            r'\b(\d{2}/\d{2}) \d{2}/\d{2} (.*?) \d+ \d+ ('+AMOUNT+r')\b',
+            _transaction, contents)
 
-        postings = [data.Posting(account, amt, None, None, None, None)]
-        meta = data.new_metadata(filename, len(transactions))
-        transactions.append(data.Transaction(
-            meta=meta,
-            date=date,
-            flag=flags.FLAG_OKAY,
-            payee=None,
-            narration=descr,
-            tags=set(),
-            links=set(),
-            postings=postings,
-        ))
-    for match in TRANSACTION_RE.finditer(contents):
-        txnTransform(match)
-
-    transactions.append(
-            data.Balance(
-                data.new_metadata(filename, len(transactions)),
-                closing_date + datetime.timedelta(days=1),
-                account, balance, None, None),
-    )
-
-    return transactions
-
+    l = BeancountLedgerItems(filename)
+    l.AddTransactions(account, transactions)
+    l.AddBalance(account, closing_date, balance)
+    return l.items
