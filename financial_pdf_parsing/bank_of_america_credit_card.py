@@ -1,4 +1,5 @@
 import datetime
+import re
 
 from dateutil import parser
 
@@ -11,31 +12,63 @@ from financial_pdf_parsing import pdf
 
 FILE_PATTERN =  r'^eStmt_.*\.pdf$'
 
-def readTransactions(f, filename, account, closing_date):
+def compileRE(pattern):
+    return re.compile(pattern, re.DOTALL)
+
+AMOUNT = r'-?\$?[0-9,]+\.[0-9]{1,2}'
+
+BALANCE_RE = compileRE(r'\bNew Balance Total +('+AMOUNT+r')\b')
+
+CLOSE_DATE_RE = compileRE(r'\bStatement Closing Date (\d+/\d+/\d+)\b')
+
+# Example:  12/05 12/07 WHOLE FOODS #1234 SF CA 8538 3456 251.49
+TRANSACTION_RE = compileRE(r'\b(\d{2}/\d{2}) \d{2}/\d{2} (.*?) \d+ \d+ ('+AMOUNT+r')\b')
+
+def reduceMatches(pattern, text, match_transform):
+    results = set()
+    for match in pattern.finditer(text):
+        r = match_transform(match)
+        results.add(r)
+    return results
+
+def reduceSingleMatch(pattern, text, match_transform):
+    results = reduceMatches(pattern, text, match_transform)
+    if len(results) == 0:
+        raise ValueError('found no balance')
+    if len(results) > 1:
+        raise ValueError(f'found more than one balance: {results}')
+    return results.pop()
+        
+
+def Read(filename, account):
+    """Reads the PDF at filename and returns a list of Beancount transactions.
+
+    account is the string account name to which one side of
+    transactions should be recorded. Should be a liability account.
+    """
+    contents = pdf.PDFToText(filename)
+
+    def balanceTransform(m):
+        b = pdf.ParseAmount(m.group(1))
+        # We are treating as a liability so invert.
+        return pdf.InvertAmount(b)
+    balance = reduceSingleMatch(BALANCE_RE, contents, balanceTransform)
+
+    def closeDateTransform(m):
+        return parser.parse(m.group(1)).date()
+    closing_date = reduceSingleMatch(CLOSE_DATE_RE, contents, closeDateTransform)
+
     transactions = []
-    index = 0
-
-    for line in f:
-        line = line.strip('\n')
-        # Line structure:
-        # 0-txn-date 1-post-date description -3-ref-date -2-acct -1-amount
-        parts = line.split()
-        if len(parts) < 6:
-            break # Assume we've hit the end.
-
-        try:
-            date = parser.parse(parts[0]).date()
-        except parser.ParserError:
-            break # Assume we've hit the end.
+    def txnTransform(m):
+        date = parser.parse(m.group(1)).date()
         date = pdf.AdjustDateForYearBoundary(date, closing_date)
-        amt = pdf.ParseAmount(parts[-1])
+        descr = m.group(2)
+        amt = pdf.ParseAmount(m.group(3))
         # We are treating as a liability so invert.
         amt = pdf.InvertAmount(amt)
-        descr = ' '.join(parts[2:-3])
 
-        meta = data.new_metadata(filename, index)
-        index += 1
         postings = [data.Posting(account, amt, None, None, None, None)]
+        meta = data.new_metadata(filename, len(transactions))
         transactions.append(data.Transaction(
             meta=meta,
             date=date,
@@ -46,48 +79,8 @@ def readTransactions(f, filename, account, closing_date):
             links=set(),
             postings=postings,
         ))
-
-    return transactions
-
-
-def Read(filename, account):
-    """Reads the PDF at filename and returns a list of Beancount transactions.
-
-    account is the string account name to which one side of
-    transactions should be recorded. Should be a liability account.
-    """
-    contents = pdf.StringIO(filename)
-
-    balance = None
-    closing_date = None
-    transactions = []
-
-    for line in contents:
-        line = line.strip('\n')
-        # TODO: process rewards balance too
-
-        if line.startswith('New Balance Total'):
-            if balance is None:
-                parts = line.split()
-                balance = pdf.ParseAmount(parts[-1])
-                # We are treating as a liability so invert.
-                balance = pdf.InvertAmount(balance)
-
-        elif line.startswith('Statement Closing Date'):
-            if closing_date is not None:
-                raise ValueError('already processed closing_date')
-            parts = line.split()
-            closing_date = parser.parse(parts[-1]).date()
-
-        elif line == 'Purchases and Adjustments':
-            if closing_date is None:
-                raise ValueError('unable to find Closing Date before reaching transactions')
-            transactions.extend(readTransactions(contents, filename, account, closing_date))
-
-        elif line == 'Payments and Other Credits':
-            if closing_date is None:
-                raise ValueError('unable to find Closing Date before reaching transactions')
-            transactions.extend(readTransactions(contents, filename, account, closing_date))
+    for match in TRANSACTION_RE.finditer(contents):
+        txnTransform(match)
 
     transactions.append(
             data.Balance(

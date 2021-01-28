@@ -12,10 +12,13 @@ NEGATIVE_ONE = number.D("-1")
 def InvertAmount(amt):
     return amount.mul(amt, NEGATIVE_ONE)
 
+def PDFToText(filename):
+    """Returns the text for the given PDF."""
+    return subprocess.check_output(['pdftotext', '-raw', filename, '-']).decode()
+
 def StringIO(filename):
     """Returns a StringIO of the PDF contents for the given file."""
-    text = subprocess.check_output(['pdftotext', '-raw', filename, '-']).decode()
-    return io.StringIO(text)
+    return io.StringIO(PDFToText(filename))
 
 def ParseAmount(s):
     """Converts a string amount to an amount.Amount, in USD."""
