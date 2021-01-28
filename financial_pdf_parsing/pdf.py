@@ -1,5 +1,4 @@
 import io
-import subprocess
 
 # TODO: use internal types for balances so that the core parsing doesn't
 #       need to depend on Beancount and so is fully generic?
@@ -11,14 +10,6 @@ NEGATIVE_ONE = number.D("-1")
 # TODO: Move this to a Beancount-specific common library.
 def InvertAmount(amt):
     return amount.mul(amt, NEGATIVE_ONE)
-
-def PDFToText(filename):
-    """Returns the text for the given PDF."""
-    return subprocess.check_output(['pdftotext', '-raw', filename, '-']).decode()
-
-def StringIO(filename):
-    """Returns a StringIO of the PDF contents for the given file."""
-    return io.StringIO(PDFToText(filename))
 
 def ParseAmount(s):
     """Converts a string amount to an amount.Amount, in USD."""

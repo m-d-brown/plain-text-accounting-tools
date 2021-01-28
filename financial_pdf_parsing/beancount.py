@@ -1,11 +1,47 @@
+"""beancount provides Beancount importers that rely on the parsers in the
+parsers module."""
+
+import datetime
 import re
 import os
 
-from financial_pdf_parsing import bank_of_america_credit_card
+from financial_pdf_parsing import parsers
 
 from beancount.core import data
 from beancount.core import flags
 from beancount.ingest import importer
+
+class BeancountLedgerItems:
+    def __init__(self, filename):
+        self.items = []
+        self.filename = filename
+
+    def _metadata(self):
+        return data.new_metadata(self.filename, len(self.items))
+
+    def AddTransactions(self, account, txns):
+        for t in txns:
+            postings = [data.Posting(account, t.amount, None, None, None, None)]
+            self.items.append(data.Transaction(
+                meta=self._metadata(),
+                date=t.date,
+                flag=flags.FLAG_OKAY,
+                payee=None,
+                narration=t.descr,
+                tags=set(),
+                links=set(),
+                postings=postings,
+            ))
+
+    def AddBalance(self, account, closing_date, balance):
+        self.items.append(data.Balance(
+            self._metadata(),
+            closing_date + datetime.timedelta(days=1),
+            account, balance, None, None))
+
+    def SortedItems(self):
+        return data.sorted(self.items)
+
 
 class BankOfAmericaCreditCard(importer.ImporterProtocol):
 
@@ -15,7 +51,7 @@ class BankOfAmericaCreditCard(importer.ImporterProtocol):
         self.account = account
 
     def identify(self, f):
-        return re.match(bank_of_america_credit_card.FILE_PATTERN, os.path.basename(f.name))
+        return re.match(parsers.BANK_OF_AMERICA_CREDIT_CARD_FILE_PATTERN, os.path.basename(f.name))
 
     def file_account(self, f):
         return self.account
@@ -25,5 +61,8 @@ class BankOfAmericaCreditCard(importer.ImporterProtocol):
     #def file_date(self, f):
 
     def extract(self, f):
-        transactions = bank_of_america_credit_card.Read(f.name, self.account)
-        return data.sorted(transactions)
+        balance, closing_date, transactions = parsers.BankOfAmericaCreditCard(f.name)
+        l = BeancountLedgerItems(f.name)
+        l.AddTransactions(self.account, transactions)
+        l.AddBalance(self.account, closing_date, balance)
+        return l.SortedItems()

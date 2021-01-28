@@ -1,48 +1,23 @@
+"""parsers provides functions that parse PDF credit card statements."""
+
 import collections
 import datetime
 import re
+import subprocess
 
 from dateutil import parser
 
-# TODO: use internal types for transactions so that the core parsing doesn't
-#       need to depend on Beancount and so is fully generic?
-from beancount.core import data
-from beancount.core import flags
-
 from financial_pdf_parsing import pdf
 
-FILE_PATTERN =  r'^eStmt_.*\.pdf$'
+def PDFToText(filename):
+    """Returns the text for the given PDF."""
+    return subprocess.check_output(['pdftotext', '-raw', filename, '-']).decode()
 
-
+# date is a datetime. descr is a string. amount is a beancount data.Amount.
 Transaction = collections.namedtuple('Transaction', 'date descr amount')
 
-class BeancountLedgerItems:
-    def __init__(self, filename):
-        self.items = []
-        self.filename = filename
-
-    def _metadata(self):
-        return data.new_metadata(self.filename, len(self.items))
-
-    def AddTransactions(self, account, txns):
-        for t in txns:
-            postings = [data.Posting(account, t.amount, None, None, None, None)]
-            self.items.append(data.Transaction(
-                meta=self._metadata(),
-                date=t.date,
-                flag=flags.FLAG_OKAY,
-                payee=None,
-                narration=t.descr,
-                tags=set(),
-                links=set(),
-                postings=postings,
-            ))
-
-    def AddBalance(self, account, closing_date, balance):
-        self.items.append(data.Balance(
-            self._metadata(),
-            closing_date + datetime.timedelta(days=1),
-            account, balance, None, None))
+# A common pattern for dollar amounts.
+AMOUNT = r'-?\$?[0-9,]+\.[0-9]{1,2}'
 
 def compileRE(pattern):
     return re.compile(pattern, re.DOTALL)
@@ -69,15 +44,17 @@ def parseAll(pattern, parser, text):
         results.append(t)
     return results
 
-AMOUNT = r'-?\$?[0-9,]+\.[0-9]{1,2}'
 
-def Read(filename, account):
-    """Reads the PDF at filename and returns a list of Beancount transactions.
+################################################################
 
-    account is the string account name to which one side of
-    transactions should be recorded. Should be a liability account.
+BANK_OF_AMERICA_CREDIT_CARD_FILE_PATTERN =  r'^eStmt_.*\.pdf$'
+
+def BankOfAmericaCreditCard(filename):
+    """Reads the PDF at filename and returns contents.
+
+    Returns (balance, closing_date, [Transaction]).
     """
-    contents = pdf.PDFToText(filename)
+    contents = PDFToText(filename)
 
     def _balance(match):
         b = pdf.ParseAmount(match.group(1))
@@ -104,7 +81,4 @@ def Read(filename, account):
             r'\b(\d{2}/\d{2}) \d{2}/\d{2} (.*?) \d+ \d+ ('+AMOUNT+r')\b',
             _transaction, contents)
 
-    l = BeancountLedgerItems(filename)
-    l.AddTransactions(account, transactions)
-    l.AddBalance(account, closing_date, balance)
-    return l.items
+    return balance, closing_date, transactions
