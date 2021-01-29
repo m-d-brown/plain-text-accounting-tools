@@ -17,10 +17,11 @@ def PDFToText(filename):
 Transaction = collections.namedtuple('Transaction', 'date descr amount')
 
 # A common pattern for dollar amounts.
-AMOUNT = r'-?\$?[0-9,]+\.[0-9]{1,2}'
+# Allows for a space after the negative sign, like '- $65.71'.
+AMOUNT = r'(?:-|- )?\$?[0-9,]+\.[0-9]{1,2}'
 
 def compileRE(pattern):
-    return re.compile(pattern, re.DOTALL)
+    return re.compile(pattern, re.DOTALL|re.MULTILINE)
 
 def reduceSingleMatch(pattern, parser, text):
     pattern = compileRE(pattern)
@@ -43,6 +44,10 @@ def parseAll(pattern, parser, text):
         t = parser(match)
         results.append(t)
     return results
+
+def RemoveNewlines(string):
+    # TODO: Handle other newline characters too?
+    return string.replace("\n", " ")
 
 
 ################################################################
@@ -79,6 +84,47 @@ def BankOfAmericaCreditCard(filename):
     transactions = parseAll(
             # Example:  12/05 12/07 WHOLE FOODS #1234 SF CA 8538 3456 251.49
             r'\b(\d{2}/\d{2}) \d{2}/\d{2} (.*?) \d+ \d+ ('+AMOUNT+r')\b',
+            _transaction, contents)
+
+    return balance, closing_date, transactions
+
+
+################################################################
+
+CAPITAL_ONE_CREDIT_CARD_FILE_PATTERN =  r'^Statement_\d+_\d+.pdf$'
+
+def CapitalOneCreditCard(filename):
+    """Reads the PDF at filename and returns contents.
+
+    Returns (balance, closing_date, [Transaction]).
+    """
+    contents = PDFToText(filename)
+
+    def _balance(match):
+        b = pdf.ParseAmount(match.group(1))
+        return pdf.InvertAmount(b) # Treat as liability
+    balance = reduceSingleMatch(
+            r'\bNew Balance = +('+AMOUNT+r')\b',
+            _balance, contents)
+
+    def _closing(match):
+        return parser.parse(match.group(1)).date()
+    closing_date = reduceSingleMatch(
+            # Dec. 23, 2020 - Jan. 22, 2021 | 31 days in Billing Cycle 
+            r'- (.*?) \| \d+ days? in Billing Cycle\b',
+            _closing, contents)
+
+    def _transaction(match):
+        date = parser.parse(match.group(1)).date()
+        date = pdf.AdjustDateForYearBoundary(date, closing_date)
+        descr = match.group(2)
+        descr = RemoveNewlines(descr)
+        amt = pdf.ParseAmount(match.group(3))
+        amt = pdf.InvertAmount(amt) # Treat as liability
+        return Transaction(date, descr, amt)
+    transactions = parseAll(
+            # Dec 30 NYTimes*NYTimes 800-698-4637NY $10.00 
+            r'\b([a-zA-z]{3} \d{2}) (.*?)\s+('+AMOUNT+r')$',
             _transaction, contents)
 
     return balance, closing_date, transactions

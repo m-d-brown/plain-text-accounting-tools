@@ -23,6 +23,7 @@ get started with it and double entry accounting.
 The following institutions are supported:
 
 * Bank of America credit cards
+* Capital One credit cards
 
 The project depends on:
 
@@ -41,7 +42,7 @@ original statements, anonymizing the produced text, then printing to a PDF:
 % vi financial-pdf-parsing/raw_test_data/eStmt_2021-01-04.txt
 
 # Open raw in Chrome and print to PDF to
-# financial-pdf-parsing/financial_pdf_parsing/importer_regression/eStmt_2021-01-04.pdf
+# financial-pdf-parsing/financial_pdf_parsing/importer_regression/bank_of_america_credit_card/eStmt_2021-01-04.pdf
 
 # Regnerate regression test output files and view changes.
 % pytest --generate

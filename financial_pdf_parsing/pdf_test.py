@@ -12,5 +12,8 @@ class TestParseAmount(unittest.TestCase):
         self.assertEqual(pdf.ParseAmount("1.23"), usd("1.23"))
         self.assertEqual(pdf.ParseAmount("$1.23"), usd("1.23"))
 
-    def testNegative    (self):
+    def testNegative(self):
         self.assertEqual(pdf.ParseAmount("-$1.23"), usd("-1.23"))
+
+    def testNegativeWithSpace(self):
+        self.assertEqual(pdf.ParseAmount("- $1.23"), usd("-1.23"))

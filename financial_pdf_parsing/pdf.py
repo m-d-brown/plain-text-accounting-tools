@@ -20,7 +20,10 @@ def ParseAmount(s):
     if s.startswith('-$'):
         s = s[2:]
         invert = True
-    if s[0] == "$":
+    elif s.startswith('- $'):
+        s = s[3:]
+        invert = True
+    elif s[0] == "$":
         s = s[1:]
     a = amount.Amount(number.D(s), 'USD')
     if invert:
