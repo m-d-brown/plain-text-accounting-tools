@@ -1,0 +1,11 @@
+
+2020-12-21 * "AMZN Mktp US*0A1234 Amzn.com/bill WA"
+  Liabilities:Chase:CC  -14.16 USD
+
+2020-12-22 * "Amazon.com*AB Amzn.com/bill WA"
+  Liabilities:Chase:CC  -100.00 USD
+
+2021-01-01 * "AUTOMATIC PAYMENT - THANK YOU"
+  Liabilities:Chase:CC  10.99 USD
+
+2021-01-05 balance Liabilities:Chase:CC                            -114.16 USD

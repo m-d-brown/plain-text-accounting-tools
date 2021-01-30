@@ -91,7 +91,7 @@ def BankOfAmericaCreditCard(filename):
 
 ################################################################
 
-CAPITAL_ONE_CREDIT_CARD_FILE_PATTERN =  r'^Statement_\d+_\d+.pdf$'
+CAPITAL_ONE_CREDIT_CARD_FILE_PATTERN =  r'^Statement_\d+_\d+\.pdf$'
 
 def CapitalOneCreditCard(filename):
     """Reads the PDF at filename and returns contents.
@@ -126,5 +126,52 @@ def CapitalOneCreditCard(filename):
             # Dec 30 NYTimes*NYTimes 800-698-4637NY $10.00 
             r'\b([a-zA-z]{3} \d{2}) (.*?)\s+('+AMOUNT+r')$',
             _transaction, contents)
+
+    return balance, closing_date, transactions
+
+
+################################################################
+
+CHASE_CC_FILE_PATTERN = r'^\d{8}-statements-\d{4}-\.pdf$'
+
+def ChaseCC(filename):
+    """Reads the PDF at filename and returns contents.
+
+    Returns (balance, closing_date, [Transaction]).
+    """
+    contents = PDFToText(filename)
+
+    def _balance(match):
+        b = pdf.ParseAmount(match.group(1))
+        return pdf.InvertAmount(b) # Treat as liability
+    balance = reduceSingleMatch(
+            r'\bNew Balance +('+AMOUNT+r')\b',
+            _balance, contents)
+
+    def _closing(match):
+        return parser.parse(match.group(1)).date()
+    closing_date = reduceSingleMatch(
+            #   Opening/Closing Date 12/05/20 - 01/04/21
+            r'\bOpening/Closing Date [0-9/]+ - ([0-9/]+)\b',
+            _closing, contents)
+
+    def _transaction(match):
+        date = parser.parse(match.group(1)).date()
+        date = pdf.AdjustDateForYearBoundary(date, closing_date)
+        descr = RemoveNewlines(match.group(2))
+        amt = pdf.ParseAmount(match.group(3))
+        amt = pdf.InvertAmount(amt) # Treat as liability
+        order_no = match.group(4)
+        if order_no:
+            descr += '. ' + order_no
+        return Transaction(date, descr, amt)
+    transactions = parseAll(
+            # 01/01 AUTOMATIC PAYMENT - THANK YOU -10.99
+            r'\s(\d{2}/\d{2}) (.*?) ('+AMOUNT+r')$(?:(Order Number [1-9-]+))?\b',
+            _transaction, contents)
+
+    # TODO: Also handle reward transactions, which have an extra rewards
+    #       field at the end
+    # 12/20 AMAZON MARKETPLACE AMZN.COM/BILLWA 32.43 3,243
 
     return balance, closing_date, transactions

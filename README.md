@@ -24,6 +24,7 @@ The following institutions are supported:
 
 * Bank of America credit cards
 * Capital One credit cards
+* Chase credit cards
 
 The project depends on:
 
