@@ -43,6 +43,31 @@ class BeancountLedgerItems:
         return data.sorted(self.items)
 
 
+class BankOfAmericaBank(importer.ImporterProtocol):
+
+    def __init__(self, account):
+        """account is the string account name to which one side of
+        transactions should be recorded. Should be a liability account."""
+        self.account = account
+
+    def identify(self, f):
+        return re.match(parsers.BANK_OF_AMERICA_BANK_FILE_PATTERN, os.path.basename(f.name))
+
+    def file_account(self, f):
+        return self.account
+
+    # TODO: Worth importing these too?
+    #def file_name(self, f):
+    #def file_date(self, f):
+
+    def extract(self, f):
+        balance, closing_date, transactions = parsers.BankOfAmericaBank(f.name)
+        l = BeancountLedgerItems(f.name)
+        l.AddTransactions(self.account, transactions)
+        l.AddBalance(self.account, closing_date, balance)
+        return l.SortedItems()
+
+
 class BankOfAmericaCreditCard(importer.ImporterProtocol):
 
     def __init__(self, account):

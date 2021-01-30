@@ -52,6 +52,43 @@ def RemoveNewlines(string):
 
 ################################################################
 
+BANK_OF_AMERICA_BANK_FILE_PATTERN =  r'^eStmt_.*\.pdf$'
+
+def BankOfAmericaBank(filename):
+    """Reads the PDF at filename and returns contents.
+
+    Returns (balance, closing_date, [Transaction]).
+    """
+    contents = PDFToText(filename)
+    # Ending balance on January 27, 2021 $209.01
+    pattern = r'\bEnding balance on ([a-zA-Z]+ \d+,? \d+) ('+AMOUNT+r')\b'
+
+    def _balance(match):
+        return pdf.ParseAmount(match.group(2))
+    balance = reduceSingleMatch(pattern, _balance, contents)
+
+    def _closing(match):
+        return parser.parse(match.group(1)).date()
+    closing_date = reduceSingleMatch(pattern, _closing, contents)
+
+    def _transaction(match):
+        date = parser.parse(match.group(1)).date()
+        date = pdf.AdjustDateForYearBoundary(date, closing_date)
+        descr = RemoveNewlines(match.group(2))
+        amt = pdf.ParseAmount(match.group(3))
+        return Transaction(date, descr, amt)
+    transactions = parseAll(
+            # 01/04/21 Bank of America DES:CASHREWARD ID:DOE INDN:0000000123456789000000 CO
+            # ID:234567890123 PPD
+            # 85.51
+            r'\b(\d{2}/\d{2}/\d{2}) (.*?)\s('+AMOUNT+r')\b',
+            _transaction, contents)
+
+    return balance, closing_date, transactions
+
+
+################################################################
+
 BANK_OF_AMERICA_CREDIT_CARD_FILE_PATTERN =  r'^eStmt_.*\.pdf$'
 
 def BankOfAmericaCreditCard(filename):

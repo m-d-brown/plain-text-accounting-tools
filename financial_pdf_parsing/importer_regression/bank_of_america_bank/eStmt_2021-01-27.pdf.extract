@@ -1,0 +1,8 @@
+
+2020-01-27 * "Interest Earned"
+  Liabilities:BankOfAmerica:Checking  0.05 USD
+
+2021-01-04 * "Bank of America DES:CASHREWARD ID:DOE INDN:0000000123456789000000 CO ID:234567890123 PPD"
+  Liabilities:BankOfAmerica:Checking  85.51 USD
+
+2021-01-28 balance Liabilities:BankOfAmerica:Checking              209.01 USD

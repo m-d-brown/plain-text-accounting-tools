@@ -20,9 +20,9 @@ My other project, https://github.com/m-d-brown/beancount-basics, has
 more information about Beancount, with links to many better resources to
 get started with it and double entry accounting.
 
-The following institutions are supported:
+The following institutions and statement types are supported:
 
-* Bank of America credit cards
+* Bank of America bank account and credit cards
 * Capital One credit cards
 * Chase credit cards
 
