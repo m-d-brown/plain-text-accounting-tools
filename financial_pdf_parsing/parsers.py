@@ -138,10 +138,17 @@ BANK_OF_AMERICA_CREDIT_CARD_FILE_PATTERN =  r'^eStmt_.*\.pdf$'
 def BankOfAmericaCreditCard(filename):
     """Reads the PDF at filename and returns contents.
 
-    Returns (balance, closing_date, [Transaction]).
+    Returns (account_no, balance, closing_date, [Transaction]).
+
+    Raises ValueError if the file cannot be parsed.
     """
     contents = PDFToText(filename)
 
+    account_no = reduceSingleMatch(
+            # Account Number: 1234 5678 9012 3456
+            r'Account Number: (\d{4} \d{4} \d{4} \d{4})',
+            lambda m: m.group(1), contents)
+ 
     def _balance(match):
         b = pdf.ParseAmount(match.group(1))
         # TODO: Amount inversion should be done in the Beancount importer.
@@ -170,7 +177,7 @@ def BankOfAmericaCreditCard(filename):
             r'\b(\d{2}/\d{2}) \d{2}/\d{2} (.*?) \d+ \d+ ('+AMOUNT+r')\b',
             _transaction, contents)
 
-    return balance, closing_date, transactions
+    return account_no, balance, closing_date, transactions
 
 
 ################################################################

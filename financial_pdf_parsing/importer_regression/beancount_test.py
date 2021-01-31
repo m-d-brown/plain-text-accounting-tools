@@ -14,7 +14,7 @@ class TestImporterAmexCC(regtest.ImporterTestBase):
 class TestImporterBoABank(regtest.ImporterTestBase):
     pass
 
-@regtest.with_importer(beancount.BankOfAmericaCreditCard('Liabilities:BankOfAmerica:CashRewardsCC'))
+@regtest.with_importer(beancount.BankOfAmericaCreditCard('Liabilities:BankOfAmerica:CashRewardsCC', '1234 5678 9012 3456'))
 @regtest.with_testdir(path.join(path.dirname(__file__), 'bank_of_america_credit_card'))
 class TestImporterBoACC(regtest.ImporterTestBase):
     pass
