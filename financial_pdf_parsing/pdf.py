@@ -39,7 +39,7 @@ def AdjustDateForYearBoundary(to_adjust, latest_date):
     For example, an input may have dates 12/31 and 01/01. This crosses the
     year boundary so 01/01 is year X and 12/31 is year X-1.
     """
-    if to_adjust < latest_date:
+    if to_adjust <= latest_date:
         return to_adjust
     return to_adjust.replace(year=to_adjust.year-1)
 
