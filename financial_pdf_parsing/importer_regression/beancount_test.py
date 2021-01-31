@@ -4,6 +4,11 @@ from beancount.ingest import regression_pytest as regtest
 
 from financial_pdf_parsing import beancount
 
+@regtest.with_importer(beancount.AmericanExpressCC('Liabilities:Amex:BlueCash'))
+@regtest.with_testdir(path.join(path.dirname(__file__), 'american_express_cc'))
+class TestImporterAmexCC(regtest.ImporterTestBase):
+    pass
+
 @regtest.with_importer(beancount.BankOfAmericaBank('Liabilities:BankOfAmerica:Checking'))
 @regtest.with_testdir(path.join(path.dirname(__file__), 'bank_of_america_bank'))
 class TestImporterBoABank(regtest.ImporterTestBase):

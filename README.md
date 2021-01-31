@@ -22,6 +22,7 @@ get started with it and double entry accounting.
 
 The following institutions and statement types are supported:
 
+* American Express credit cards
 * Bank of America bank account and credit cards
 * Capital One credit cards
 * Chase credit cards

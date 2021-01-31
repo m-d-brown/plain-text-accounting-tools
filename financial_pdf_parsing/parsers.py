@@ -52,6 +52,50 @@ def RemoveNewlines(string):
 
 ################################################################
 
+AMERICAN_EXPRESS_CC_FILE_PATTERN =  r'^\d{4}-\d{2}-\d{2}\.pdf$'
+
+def AmericanExpressCC(filename):
+    """Reads the PDF at filename and returns contents.
+
+    Returns (balance, closing_date, [Transaction]).
+    """
+    contents = PDFToText(filename)
+
+    def _balance(match):
+        b = pdf.ParseAmount(match.group(1))
+        # TODO: Amount inversion should be done in the Beancount importer.
+        # These parsers should return the raw values, which can be
+        # interpreted as needed for specific accounts.
+        return pdf.InvertAmount(b) # Treat as liability
+    balance = reduceSingleMatch(
+            r'\bNew Balance ('+AMOUNT+r')\b',
+            _balance, contents)
+
+    def _closing(match):
+        return parser.parse(match.group(1)).date()
+    closing_date = reduceSingleMatch(
+            r'\bClosing Date (\d+/\d+/\d+)\b',
+            _closing, contents)
+
+    def _transaction(match):
+        date = parser.parse(match.group(1)).date()
+        date = pdf.AdjustDateForYearBoundary(date, closing_date)
+        descr = RemoveNewlines(match.group(2))
+        amt = pdf.ParseAmount(match.group(3))
+        amt = pdf.InvertAmount(amt) # Treat as liability
+        return Transaction(date, descr, amt)
+    transactions = parseAll(
+            # 01/23/21* PHOTOGPHY PLAN NEW YORK NY
+            # PHOTO.LY/URL
+            # $1.99
+            r'^(\d{2}/\d{2}/\d{2})\*? (.*?)\s('+AMOUNT+r')\b',
+            _transaction, contents)
+
+    return balance, closing_date, transactions
+
+
+################################################################
+
 BANK_OF_AMERICA_BANK_FILE_PATTERN =  r'^eStmt_.*\.pdf$'
 
 def BankOfAmericaBank(filename):
@@ -100,6 +144,9 @@ def BankOfAmericaCreditCard(filename):
 
     def _balance(match):
         b = pdf.ParseAmount(match.group(1))
+        # TODO: Amount inversion should be done in the Beancount importer.
+        # These parsers should return the raw values, which can be
+        # interpreted as needed for specific accounts.
         return pdf.InvertAmount(b) # Treat as liability
     balance = reduceSingleMatch(
             r'\bNew Balance Total +('+AMOUNT+r')\b',
