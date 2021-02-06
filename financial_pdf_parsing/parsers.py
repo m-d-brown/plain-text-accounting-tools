@@ -101,19 +101,26 @@ BANK_OF_AMERICA_BANK_FILE_PATTERN =  r'^eStmt_.*\.pdf$'
 def BankOfAmericaBank(filename):
     """Reads the PDF at filename and returns contents.
 
-    Returns (balance, closing_date, [Transaction]).
+    Returns (account_no, balance, closing_date, [Transaction]).
+
+    Raises ValueError if the file cannot be parsed.
     """
     contents = PDFToText(filename)
     # Ending balance on January 27, 2021 $209.01
-    pattern = r'\bEnding balance on ([a-zA-Z]+ \d+,? \d+) ('+AMOUNT+r')\b'
+    balance_pattern = r'\bEnding balance on ([a-zA-Z]+ \d+,? \d+) ('+AMOUNT+r')\b'
+
+    account_no = reduceSingleMatch(
+            # Account number: 0001 0002 0003
+            r'Account number: (\d{4} \d{4} \d{4})',
+            lambda m: m.group(1), contents)
 
     def _balance(match):
         return pdf.ParseAmount(match.group(2))
-    balance = reduceSingleMatch(pattern, _balance, contents)
+    balance = reduceSingleMatch(balance_pattern, _balance, contents)
 
     def _closing(match):
         return parser.parse(match.group(1)).date()
-    closing_date = reduceSingleMatch(pattern, _closing, contents)
+    closing_date = reduceSingleMatch(balance_pattern, _closing, contents)
 
     def _transaction(match):
         date = parser.parse(match.group(1)).date()
@@ -128,7 +135,7 @@ def BankOfAmericaBank(filename):
             r'\b(\d{2}/\d{2}/\d{2}) (.*?)\s('+AMOUNT+r')\b',
             _transaction, contents)
 
-    return balance, closing_date, transactions
+    return account_no, balance, closing_date, transactions
 
 
 ################################################################

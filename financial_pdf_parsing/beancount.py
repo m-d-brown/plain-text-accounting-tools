@@ -70,13 +70,27 @@ class AmericanExpressCC(importer.ImporterProtocol):
 
 class BankOfAmericaBank(importer.ImporterProtocol):
 
-    def __init__(self, account):
-        """account is the string account name to which one side of
-        transactions should be recorded. Should be a liability account."""
+    def __init__(self, account, account_no):
+        """Creates an importer for a Bank of America bank.
+
+        account is the string account name to which one side of
+        transactions should be recorded. Should be a liability account.
+
+        account_no is the string number of the account, formatted like
+        '1234 5678 9012 3456'. It's used to ensure only files belonging
+        to this account are imported.
+        """
         self.account = account
+        self.account_no = account_no
 
     def identify(self, f):
-        return re.match(parsers.BANK_OF_AMERICA_BANK_FILE_PATTERN, os.path.basename(f.name))
+        if not re.match(parsers.BANK_OF_AMERICA_BANK_FILE_PATTERN, os.path.basename(f.name)):
+            return False
+        try:
+            num, _, _, _ = parsers.BankOfAmericaBank(f.name)
+        except ValueError:
+            return False
+        return num == self.account_no
 
     def file_account(self, f):
         return self.account
@@ -86,7 +100,7 @@ class BankOfAmericaBank(importer.ImporterProtocol):
     #def file_date(self, f):
 
     def extract(self, f):
-        balance, closing_date, transactions = parsers.BankOfAmericaBank(f.name)
+        _, balance, closing_date, transactions = parsers.BankOfAmericaBank(f.name)
         l = BeancountLedgerItems(f.name)
         l.AddTransactions(self.account, transactions)
         l.AddBalance(self.account, closing_date, balance)
@@ -96,7 +110,7 @@ class BankOfAmericaBank(importer.ImporterProtocol):
 class BankOfAmericaCreditCard(importer.ImporterProtocol):
 
     def __init__(self, account, account_no):
-        """Initializer
+        """Creates an importer for a Bank of America credit card.
 
         account is the string account name to which one side of
         transactions should be recorded. Should be a liability account.

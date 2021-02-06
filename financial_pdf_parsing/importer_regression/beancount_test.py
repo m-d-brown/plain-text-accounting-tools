@@ -9,7 +9,7 @@ from financial_pdf_parsing import beancount
 class TestImporterAmexCC(regtest.ImporterTestBase):
     pass
 
-@regtest.with_importer(beancount.BankOfAmericaBank('Liabilities:BankOfAmerica:Checking'))
+@regtest.with_importer(beancount.BankOfAmericaBank('Liabilities:BankOfAmerica:Checking', '0001 0002 0003'))
 @regtest.with_testdir(path.join(path.dirname(__file__), 'bank_of_america_bank'))
 class TestImporterBoABank(regtest.ImporterTestBase):
     pass
