@@ -56,7 +56,7 @@ class AmericanExpressCC(importer.ImporterProtocol):
     def file_account(self, f):
         return self.account
 
-    # TODO: Worth importing these too?
+    # TODO: Worth handling these too?
     #def file_name(self, f):
     #def file_date(self, f):
 
@@ -95,7 +95,7 @@ class BankOfAmericaBank(importer.ImporterProtocol):
     def file_account(self, f):
         return self.account
 
-    # TODO: Worth importing these too?
+    # TODO: Worth handling these too?
     #def file_name(self, f):
     #def file_date(self, f):
 
@@ -134,7 +134,7 @@ class BankOfAmericaCreditCard(importer.ImporterProtocol):
     def file_account(self, f):
         return self.account
 
-    # TODO: Worth importing these too?
+    # TODO: Worth handling these too?
     #def file_name(self, f):
     #def file_date(self, f):
 
@@ -143,6 +143,41 @@ class BankOfAmericaCreditCard(importer.ImporterProtocol):
         l = BeancountLedgerItems(f.name)
         l.AddTransactions(self.account, transactions)
         l.AddBalance(self.account, closing_date, balance)
+        return l.SortedItems()
+
+
+class CapitalOneBank(importer.ImporterProtocol):
+
+    def __init__(self, file_account, num_to_account):
+        """Initializer.
+
+        file_account is the string account under which to file source PDFs.
+
+        num_account is a dict from account number string to account string.
+        """
+        self.file_account_value = file_account
+        self.num_to_account = num_to_account
+
+    def identify(self, f):
+        return re.match(parsers.CAPITAL_ONE_BANK_FILE_PATTERN, os.path.basename(f.name))
+
+    def file_account(self, f):
+        return self.file_account_value
+
+    # TODO: Worth handling these too?
+    #def file_name(self, f):
+    #def file_date(self, f):
+
+    def extract(self, f):
+        l = BeancountLedgerItems(f.name)
+        accounts = parsers.CapitalOneBank(f.name)
+        for acct_row in accounts:
+            try:
+                acct = self.num_to_account[acct_row.num]
+            except KeyError as e:
+                raise KeyError(f'no account defined for {acct_row.num}: {e}')
+            l.AddTransactions(acct, acct_row.transactions)
+            l.AddBalance(acct, acct_row.closing_date, acct_row.balance)
         return l.SortedItems()
 
 
@@ -159,7 +194,7 @@ class CapitalOneCreditCard(importer.ImporterProtocol):
     def file_account(self, f):
         return self.account
 
-    # TODO: Worth importing these too?
+    # TODO: Worth handling these too?
     #def file_name(self, f):
     #def file_date(self, f):
 
@@ -184,7 +219,7 @@ class ChaseCC(importer.ImporterProtocol):
     def file_account(self, f):
         return self.account
 
-    # TODO: Worth importing these too?
+    # TODO: Worth handling these too?
     #def file_name(self, f):
     #def file_date(self, f):
 

@@ -19,6 +19,14 @@ class TestImporterBoABank(regtest.ImporterTestBase):
 class TestImporterBoACC(regtest.ImporterTestBase):
     pass
 
+@regtest.with_importer(beancount.CapitalOneBank(
+    'Assets:CapitalOne:Checking',
+    {'111117777': 'Assets:CapitalOne:Checking',
+     '11111119999': 'Assets:CapitalOne:Savings'}))
+@regtest.with_testdir(path.join(path.dirname(__file__), 'capital_one_bank'))
+class TestImporterCapitalOneBank(regtest.ImporterTestBase):
+    pass
+
 @regtest.with_importer(beancount.CapitalOneCreditCard('Liabilities:CapitalOne:CC'))
 @regtest.with_testdir(path.join(path.dirname(__file__), 'capital_one_credit_card'))
 class TestImporterCapitalOneCC(regtest.ImporterTestBase):

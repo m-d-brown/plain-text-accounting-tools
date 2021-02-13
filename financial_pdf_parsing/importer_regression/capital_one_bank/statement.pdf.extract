@@ -1,0 +1,33 @@
+
+2021-01-06 * "Zelle money sent to GOOD FRIEND"
+  Assets:CapitalOne:Checking  -3.00 USD
+
+2021-01-12 * "Deposit from 360 Performance Savings XXXXXXX9999"
+  Assets:CapitalOne:Checking  100.00 USD
+
+2021-01-12 * "Zelle money sent to JANE DOE null"
+  Assets:CapitalOne:Checking  -25.00 USD
+
+2021-01-12 * "Withdrawal to Checking XXXXX7777"
+  Assets:CapitalOne:Savings  -100.00 USD
+
+2021-01-13 * "Withdrawal from AMEX EPAYMENT ACH PMT"
+  Assets:CapitalOne:Checking  -34.56 USD
+
+2021-01-15 * "Deposit from ADZUKI.COM PAYROLL"
+  Assets:CapitalOne:Checking  1562.18 USD
+
+2021-01-16 * "Withdrawal to 360 Performance Savings XXXXXXX9999"
+  Assets:CapitalOne:Checking  -1100.00 USD
+
+2021-01-16 * "Deposit from Checking XXXXX7777"
+  Assets:CapitalOne:Savings  1100.00 USD
+
+2021-01-31 * "Monthly Interest Paid"
+  Assets:CapitalOne:Checking  0.05 USD
+
+2021-01-31 * "Monthly Interest Paid"
+  Assets:CapitalOne:Savings  0.35 USD
+
+2021-02-01 balance Assets:CapitalOne:Checking                      462.23 USD
+2021-02-01 balance Assets:CapitalOne:Savings                       2000.35 USD

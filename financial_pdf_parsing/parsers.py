@@ -189,6 +189,62 @@ def BankOfAmericaCreditCard(filename):
 
 ################################################################
 
+CAPITAL_ONE_BANK_FILE_PATTERN =  r'^statement\.pdf$'
+
+# num is a string.
+CapitalOneBankAccount = collections.namedtuple('CapitalOneBankAccount',
+        'num balance closing_date transactions')
+
+def CapitalOneBank(filename):
+    """Reads the PDF at filename and returns contents.
+
+    Returns a list of CapitalOneBankAccount.
+    """
+    contents = PDFToText(filename)
+
+    section_expr = compileRE(
+            r'^.?(?:\w| )+ - (?P<acct_num>\d+)\b'
+            r'.*?'
+            r'(?:\w+ \d+) Opening Balance '+AMOUNT+r'\b'
+            r'(?P<transactions>.*?)\b'
+            r'(?P<closing>\w+ \d+) Closing Balance (?P<balance>'+AMOUNT+r')\b')
+
+    accounts = []
+    for section in section_expr.finditer(contents):
+        balance = pdf.ParseAmount(section.group('balance'))
+        closing_date = parser.parse(section.group('closing')).date()
+
+        # Captures the closing_date variable so defined in the loop
+        def _transaction(match):
+            date = parser.parse(match.group(1)).date()
+            date = pdf.AdjustDateForYearBoundary(date, closing_date)
+            descr = match.group(2)
+            descr = RemoveNewlines(descr)
+            amt_sign = match.group(3)
+            amt = pdf.ParseAmount(match.group(4))
+            if amt_sign == '-':
+                amt = pdf.InvertAmount(amt)
+            return Transaction(date, descr, amt)
+        # Example:
+        #   Jan 6 Zelle money sent to GOOD FRIEND Debit - $3.00 $2.00
+        #
+        # '(?:\n[^\n]+?){,2}?' is to avoid matching too many lines.
+        pattern = (r'^(\w+ \d+)\s+([^\n]+?(?:\n[^\n]+?){,2}?)\s+' +
+                   r'(?:Debit|Credit) ' +
+                   r'(\+|-) ('+AMOUNT+r') '+AMOUNT)
+        transactions = parseAll(
+                pattern,
+                _transaction, section.group('transactions'))
+
+        accounts.append(CapitalOneBankAccount(
+            section.group('acct_num'), balance,
+            closing_date, transactions))
+
+    return accounts
+
+
+################################################################
+
 CAPITAL_ONE_CREDIT_CARD_FILE_PATTERN =  r'^Statement_\d+_\d+\.pdf$'
 
 def CapitalOneCreditCard(filename):
