@@ -278,7 +278,12 @@ def CapitalOneCreditCard(filename):
         return Transaction(date, descr, amt)
     transactions = parseAll(
             # Dec 30 NYTimes*NYTimes 800-698-4637NY $10.00 
-            r'\b([a-zA-z]{3} \d{2}) (.*?)\s+('+AMOUNT+r')$',
+            #
+            # Or three lines:
+            # Mar 2 AMZN Mktp
+            # CA*AB1234567AMAZON.CAWA
+            # $46.56
+            r'\b([a-zA-z]{3} \d{1,2}) (.*?)\s+('+AMOUNT+r')$',
             _transaction, contents)
 
     return balance, closing_date, transactions
