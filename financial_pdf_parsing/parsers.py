@@ -265,7 +265,7 @@ def CapitalOneCreditCard(filename):
         return parser.parse(match.group(1)).date()
     closing_date = reduceSingleMatch(
             # Dec. 23, 2020 - Jan. 22, 2021 | 31 days in Billing Cycle 
-            r'- (.*?) \| \d+ days? in Billing Cycle\b',
+            r'- ([a-zA-Z0-9,. ]+?) \| \d+ days? in Billing Cycle\b',
             _closing, contents)
 
     def _transaction(match):
