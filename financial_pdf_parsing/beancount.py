@@ -148,18 +148,23 @@ class BankOfAmericaCreditCard(importer.ImporterProtocol):
 
 class CapitalOneBank(importer.ImporterProtocol):
 
-    def __init__(self, file_account, num_to_account):
+    def __init__(self, file_account, num_to_account,
+            identify_pattern=parsers.CAPITAL_ONE_BANK_FILE_PATTERN,
+            skip_accounts=None):
         """Initializer.
 
         file_account is the string account under which to file source PDFs.
 
         num_account is a dict from account number string to account string.
+o
         """
         self.file_account_value = file_account
         self.num_to_account = num_to_account
+        self.identify_pattern = identify_pattern
+        self.skip_accounts = skip_accounts
 
     def identify(self, f):
-        return re.match(parsers.CAPITAL_ONE_BANK_FILE_PATTERN, os.path.basename(f.name))
+        return re.match(self.identify_pattern, os.path.basename(f.name))
 
     def file_account(self, f):
         return self.file_account_value
@@ -172,6 +177,8 @@ class CapitalOneBank(importer.ImporterProtocol):
         l = BeancountLedgerItems(f.name)
         accounts = parsers.CapitalOneBank(f.name)
         for acct_row in accounts:
+            if self.skip_accounts is not None and acct_row.num in self.skip_accounts:
+                continue
             try:
                 acct = self.num_to_account[acct_row.num]
             except KeyError as e:
