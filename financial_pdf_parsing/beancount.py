@@ -60,7 +60,7 @@ class AmericanExpressCC(importer.ImporterProtocol):
     #def file_name(self, f):
     #def file_date(self, f):
 
-    def extract(self, f):
+    def extract(self, f, existing_entries=None):
         balance, closing_date, transactions = parsers.AmericanExpressCC(f.name)
         l = BeancountLedgerItems(f.name)
         l.AddTransactions(self.account, transactions)
@@ -99,7 +99,7 @@ class BankOfAmericaBank(importer.ImporterProtocol):
     #def file_name(self, f):
     #def file_date(self, f):
 
-    def extract(self, f):
+    def extract(self, f, existing_entries=None):
         _, balance, closing_date, transactions = parsers.BankOfAmericaBank(f.name)
         l = BeancountLedgerItems(f.name)
         l.AddTransactions(self.account, transactions)
@@ -138,7 +138,7 @@ class BankOfAmericaCreditCard(importer.ImporterProtocol):
     #def file_name(self, f):
     #def file_date(self, f):
 
-    def extract(self, f):
+    def extract(self, f, existing_entries=None):
         _, balance, closing_date, transactions = parsers.BankOfAmericaCreditCard(f.name)
         l = BeancountLedgerItems(f.name)
         l.AddTransactions(self.account, transactions)
@@ -168,7 +168,7 @@ class CapitalOneBank(importer.ImporterProtocol):
     #def file_name(self, f):
     #def file_date(self, f):
 
-    def extract(self, f):
+    def extract(self, f, existing_entries=None):
         l = BeancountLedgerItems(f.name)
         accounts = parsers.CapitalOneBank(f.name)
         for acct_row in accounts:
@@ -198,7 +198,7 @@ class CapitalOneCreditCard(importer.ImporterProtocol):
     #def file_name(self, f):
     #def file_date(self, f):
 
-    def extract(self, f):
+    def extract(self, f, existing_entries=None):
         balance, closing_date, transactions = parsers.CapitalOneCreditCard(f.name)
         l = BeancountLedgerItems(f.name)
         l.AddTransactions(self.account, transactions)
