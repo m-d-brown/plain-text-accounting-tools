@@ -208,10 +208,16 @@ class CapitalOneCreditCard(importer.ImporterProtocol):
 
 class ChaseCC(importer.ImporterProtocol):
 
-    def __init__(self, account):
+    def __init__(self, account, rewards_account, rewards_currency):
         """account is the string account name to which one side of
-        transactions should be recorded. Should be a liability account."""
+        transactions should be recorded. Should be a liability account.
+
+        rewards_accounts is the account to track rewards, as an Asset account
+        in the currency given by rewards_currency.
+        """
         self.account = account
+        self.rewards_account = rewards_account
+        self.rewards_currency = rewards_currency
 
     def identify(self, f):
         return re.match(parsers.CHASE_CC_FILE_PATTERN, os.path.basename(f.name))
@@ -223,9 +229,10 @@ class ChaseCC(importer.ImporterProtocol):
     #def file_name(self, f):
     #def file_date(self, f):
 
-    def extract(self, f):
-        balance, closing_date, transactions = parsers.ChaseCC(f.name)
+    def extract(self, f, existing_entries=None):
+        balance, rewards_balance, closing_date, transactions = parsers.ChaseCC(f.name, self.rewards_currency)
         l = BeancountLedgerItems(f.name)
         l.AddTransactions(self.account, transactions)
         l.AddBalance(self.account, closing_date, balance)
+        l.AddBalance(self.rewards_account, closing_date, rewards_balance)
         return l.SortedItems()

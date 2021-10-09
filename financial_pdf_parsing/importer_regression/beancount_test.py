@@ -32,7 +32,11 @@ class TestImporterCapitalOneBank(regtest.ImporterTestBase):
 class TestImporterCapitalOneCC(regtest.ImporterTestBase):
     pass
 
-@regtest.with_importer(beancount.ChaseCC('Liabilities:Chase:CC'))
+@regtest.with_importer(beancount.ChaseCC(
+    'Liabilities:Chase:CC',
+    'Assets:Chase:CCRewards',
+    'CHASEREWARDS',
+    ))
 @regtest.with_testdir(path.join(path.dirname(__file__), 'chase_cc'))
 class TestImporterChaseCC(regtest.ImporterTestBase):
     pass

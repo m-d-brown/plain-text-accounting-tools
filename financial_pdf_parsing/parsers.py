@@ -293,10 +293,10 @@ def CapitalOneCreditCard(filename):
 
 CHASE_CC_FILE_PATTERN = r'^\d{8}-statements-\d{4}-\.pdf$'
 
-def ChaseCC(filename):
+def ChaseCC(filename, rewards_currency):
     """Reads the PDF at filename and returns contents.
 
-    Returns (balance, closing_date, [Transaction]).
+    Returns (balance, rewards_balance, closing_date, [Transaction]).
     """
     contents = PDFToText(filename)
 
@@ -306,6 +306,12 @@ def ChaseCC(filename):
     balance = reduceSingleMatch(
             r'\bNew Balance +('+AMOUNT+r')\b',
             _balance, contents)
+
+    def _rewards_balance(match):
+        return pdf.ParseAmount(match.group(1), currency=rewards_currency)
+    rewards_balance = reduceSingleMatch(
+            r'Total points available for\nredemption ([0-9,]+)',
+            _rewards_balance, contents)
 
     def _closing(match):
         return parser.parse(match.group(1)).date()
@@ -333,4 +339,4 @@ def ChaseCC(filename):
     #       field at the end
     # 12/20 AMAZON MARKETPLACE AMZN.COM/BILLWA 32.43 3,243
 
-    return balance, closing_date, transactions
+    return balance, rewards_balance, closing_date, transactions

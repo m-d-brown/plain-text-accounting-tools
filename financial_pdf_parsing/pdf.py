@@ -11,7 +11,7 @@ NEGATIVE_ONE = number.D("-1")
 def InvertAmount(amt):
     return amount.mul(amt, NEGATIVE_ONE)
 
-def ParseAmount(s):
+def ParseAmount(s, currency='USD'):
     """Converts a string amount to an amount.Amount, in USD."""
     invert = False
     if s[0] == '(' and s[-1] == ')':
@@ -25,7 +25,7 @@ def ParseAmount(s):
         invert = True
     elif s[0] == "$":
         s = s[1:]
-    a = amount.Amount(number.D(s), 'USD')
+    a = amount.Amount(number.D(s), currency)
     if invert:
         a = InvertAmount(a)
     return a
