@@ -1,4 +1,15 @@
-# financial-pdf-parsing
+# plain-text-accounting-tools
+
+**plain-text-accounting-tools** provides utilities and libraries to use
+plain text accounting for managing finances. https://plaintextaccounting.org
+is great overview of plain text accounting. Most of the tools in this
+repository are built for [Beancount](https://github.com/beancount/beancount),
+which I use. I import transactions with
+[beancount-import](https://github.com/jbms/beancount-import), which provides
+fully feature importers, a slick web UI, and automatic match to account using
+a machine learning algorithm.
+
+## financial-pdf-parsing
 
 **financial-pdf-parsing** provides Python libraries for extracting data from
 American bank and credit card PDF statements, as well as importers to bring the
@@ -7,14 +18,11 @@ Beancount importer logic is separated from the PDF parsing logic so that the
 latter is more reusable. It also helps show the connection to Beancount's APIs
 (which took me some time to learn).
 
-My preferred workflow for double-entry accounting with
-[Beancount](https://github.com/beancount/beancount) is to download PDF
+My preferred workflow for some account, like credit cards, is to download PDF
 statements, extract transaction data, add them to my ledger, and file the
-original PDF. I prefer PDF statements over alternatives like CSV and OFX because
-I don't need to download additional files or trust tools with sensitive
-credentials. With PDF statements my banks and credit card providers email me
-monthly and I can then check the original source statement, account them and
-file away with minimal overhead.
+original PDF. I prefer PDF statements over alternatives like OFX for credit
+cards because and credit card providers email me monthly and I can then check
+the original source statement, account them and file away with minimal overhead.
 
 The following institutions and statement types are supported:
 
@@ -24,15 +32,9 @@ The following institutions and statement types are supported:
 * Chase credit cards
 
 The parsing of each has an end-to-end test using Beancount and anonymized
-PDF files, described in the "Regressioh test peparation" section.
+PDF files, described in the "Regression test preparation" section.
 
-## Dependencies
-
-* [Beancount](https://github.com/beancount/beancount)
-* [dateutil](https://github.com/dateutil/dateutil)
-* `pdftotext` from [Poppler](https://github.com/freedesktop/poppler)
-
-## Example Beancount import.py
+### Example Beancount import.py
 
 The basis of my Beancount `import.py` file follows.
 
@@ -74,7 +76,7 @@ https://github.com/m-d-brown/beancount-basics has
 more information about Beancount, with links to many better resources to
 get started with it and double entry accounting.
 
-## Regression test preparation
+### Regression test preparation
 
 Beancount regression test PDF files are created by running `pdftotext` on
 original statements, anonymizing the produced text, then printing to a PDF:
@@ -93,3 +95,9 @@ original statements, anonymizing the produced text, then printing to a PDF:
 % pytest --generate
 % git diff
 ```
+
+## Dependencies
+
+* [Beancount](https://github.com/beancount/beancount)
+* [dateutil](https://github.com/dateutil/dateutil)
+* `pdftotext` from [Poppler](https://github.com/freedesktop/poppler)
