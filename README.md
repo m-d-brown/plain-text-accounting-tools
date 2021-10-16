@@ -4,10 +4,16 @@
 plain text accounting for managing finances. https://plaintextaccounting.org
 is great overview of plain text accounting. Most of the tools in this
 repository are built for [Beancount](https://github.com/beancount/beancount),
-which I use. I import transactions with
+which I use. I also import transactions with
 [beancount-import](https://github.com/jbms/beancount-import), which provides
-fully feature importers, a slick web UI, and automatic match to account using
+fully featured importers, a slick web UI, and automatic match to account using
 a machine learning algorithm.
+
+The repository contains:
+
+* **[ofx_pretty](#ofx_pretty)** to prettify OFX files.
+* **[financial-pdf-parsing](#financial-pdf-parsing)** to extract transactions
+  from PDF financial statements.
 
 ## ofx_pretty
 
