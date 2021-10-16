@@ -12,8 +12,10 @@ a machine learning algorithm.
 ## ofx_pretty
 
 **[ofx_pretty.py](ofx_pretty.py)** takes a path to an OFX file as the first
-argument and prints a prettified version to stdout. It does not yet include the
-metadata at the start of the file. You'll have to copy that yourself!
+argument and prints a prettified version to stdout. Prettified means that each
+field is placed on its own line and fields are properly indented in the correct
+hierarchy. ofx_pretty.py does not yet include the metadata at the start of the
+file! You'll have to copy that yourself.
 
 Requires Python 3.9 and https://github.com/csingley/ofxtools.
 

@@ -3,8 +3,8 @@
 
 """ofx_pretty takes a path to an OFX file as the first argument
 and prints a prettified version to stdout. It does not yet
-include the metadata at the start of the file. You'll have to
-copy that yourself!
+include the metadata at the start of the file! You'll have to
+copy that yourself.
 """
 
 import sys
