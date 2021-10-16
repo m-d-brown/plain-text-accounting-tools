@@ -9,6 +9,31 @@ which I use. I import transactions with
 fully feature importers, a slick web UI, and automatic match to account using
 a machine learning algorithm.
 
+## ofx_pretty
+
+**[ofx_pretty.py](ofx_pretty.py)** takes a path to an OFX file as the first
+argument and prints a prettified version to stdout. It does not yet include the
+metadata at the start of the file. You'll have to copy that yourself!
+
+Requires Python 3.9 and https://github.com/csingley/ofxtools.
+
+Example:
+
+```
+% ./ofx_pretty.py data/CapitalOne/2021-01-01_Checking...1234.qfx | head
+<OFX>
+  <SIGNONMSGSRSV1>
+    <SONRS>
+      <STATUS>
+        <CODE>0</CODE>
+        <SEVERITY>INFO</SEVERITY>
+      </STATUS>
+      <DTSERVER>202101010000.000</DTSERVER>
+      <LANGUAGE>ENG</LANGUAGE>
+      <FI>
+```
+
+
 ## financial-pdf-parsing
 
 **financial-pdf-parsing** provides Python libraries for extracting data from
@@ -96,7 +121,7 @@ original statements, anonymizing the produced text, then printing to a PDF:
 % git diff
 ```
 
-## Dependencies
+### Dependencies
 
 * [Beancount](https://github.com/beancount/beancount)
 * [dateutil](https://github.com/dateutil/dateutil)
