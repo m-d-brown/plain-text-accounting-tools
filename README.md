@@ -20,13 +20,25 @@ The repository contains:
 
 ## vanguard_pdf_to_txns
 
-**[vanguard_pdf_to_txns.py][vanguard_pdf_to_txns.py] extracts transactions from
+**[vanguard_pdf_to_txns.py](vanguard_pdf_to_txns.py)** extracts transactions from
 Vanguard history web pages saved to PDF. Vanguard provides structured CSV and
 OFX files for only the last year. This provides structured data for the longer
 length of time that Vanguard provides history via web pages, in 10 year time
 intervals.  It outputs to either CSV or Beancount ledger files.
 
-See vanguard_pdf_to_txns.py for usage and more information.
+To get the input PDFs, go to "My Accounts" > "Transaction History"; select an account;
+select "10 year", "All Holdings", and "All Transaction Types"; and click
+"Update Table".  Save the page to a PDF in a new directory.  Call the PDF
+"1.pdf". If you have more transactions, click "Next", save the next page as
+"2.pdf" and repeat until you have no more transactions.
+
+vanguard_pdf_to_txns creates '.txt' forms of each PDF when it
+processes them. If these txt files exist, the tool reads them instead of
+re-parsing the PDF. This allows you to fix formatting errors in the txt file.
+Simply run the tool and if it errors out, edit the txt file and try again.
+
+The tool depends on `pdftotext` being in the PATH. It requires the dateutil
+and beancount Python packages to be installed.
 
 Example:
 
