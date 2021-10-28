@@ -11,9 +11,22 @@ a machine learning algorithm.
 
 The repository contains:
 
+* **[vanguard_pdf_to_txns](#vanguard_pdf_to_txns)** to extract transactions from
+  Vanguard history webpages saved as PDFs, which allows much more transaction
+  than Vanguard provides through other means.
 * **[ofx_pretty](#ofx_pretty)** to prettify OFX files.
 * **[financial-pdf-parsing](#financial-pdf-parsing)** to extract transactions
   from PDF financial statements.
+
+## vanguard_pdf_to_txns
+
+**[vanguard_pdf_to_txns.py][vanguard_pdf_to_txns.py] extracts transactions from
+Vanguard history web pages saved to PDF. Vanguard provides structured CSV and
+OFX files for only the last year. This provides structured data for the longer
+length of time that Vanguard provides history via web pages, in 10 year time
+intervals.  It outputs to either CSV or Beancount ledger files.
+
+See vanguard_pdf_to_txns.py for usage and more information.
 
 ## ofx_pretty
 
