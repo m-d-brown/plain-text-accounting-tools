@@ -28,6 +28,27 @@ intervals.  It outputs to either CSV or Beancount ledger files.
 
 See vanguard_pdf_to_txns.py for usage and more information.
 
+Example:
+
+```
+% ls Vanguard-Retirement
+1.pdf 2.pdf 3.pdf
+
+% ./vanguard_pdf_to_txns.py --account_type retirement --output csv Vanguard-Retirement/*.pdf
+date,fund,txn_type,shares,price,amount,filename
+2021-01-01,Total Intl Stock Ix Inv,Buy,10,100.00 USD,1000 USD,1.pdf
+...
+
+% ./vanguard_pdf_to_txns.py --account_type retirement --output beancount Vanguard-Retirement/*.pdf
+2021-01-01 * "Buy - Total Intl Stock Ix Inv"
+  Assets:Vanguard:401k:VGTSX   10 VGTSX {100 USD}
+  Assets:Vanguard:401k:Cash   -1000.00 USD
+  Income:CapitalGains:Vanguard:401k:VGTSX
+
+% ls Vanguard-Retirement
+1.pdf 1.pdf.txt 2.pdf 2.pdf.txt 3.pdf 3.pdf.txt
+```
+
 ## ofx_pretty
 
 **[ofx_pretty.py](ofx_pretty.py)** takes a path to an OFX file as the first
