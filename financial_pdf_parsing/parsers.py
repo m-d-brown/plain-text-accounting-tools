@@ -175,13 +175,13 @@ def BankOfAmericaCreditCard(filename):
     def _transaction(match):
         date = parser.parse(match.group(1)).date()
         date = pdf.AdjustDateForYearBoundary(date, closing_date)
-        descr = match.group(2)
+        descr = match.group(2).replace('\n', ' ')
         amt = pdf.ParseAmount(match.group(3))
         amt = pdf.InvertAmount(amt) # Treat as liability
         return Transaction(date, descr, amt)
     transactions = parseAll(
             # Example:  12/05 12/07 WHOLE FOODS #1234 SF CA 8538 3456 251.49
-            r'\b(\d{2}/\d{2}) \d{2}/\d{2} (.*?) \d+ \d+ ('+AMOUNT+r')\b',
+            r'\b(\d{2}/\d{2}) \d{2}/\d{2} (.*?)\s\d+ \d+ ('+AMOUNT+r')\b',
             _transaction, contents)
 
     return account_no, balance, closing_date, transactions
