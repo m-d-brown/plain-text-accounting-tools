@@ -85,10 +85,14 @@ def AmericanExpressCC(filename):
         amt = pdf.InvertAmount(amt) # Treat as liability
         return Transaction(date, descr, amt)
     transactions = parseAll(
-            # 01/23/21* PHOTOGPHY PLAN NEW YORK NY
-            # PHOTO.LY/URL
-            # $1.99
-            r'^(\d{2}/\d{2}/\d{2})\*? (.*?)\s('+AMOUNT+r')\b',
+            # Example:
+            #   01/23/21* PHOTOGPHY PLAN NEW YORK NY
+            #   PHOTO.LY/URL
+            #   $1.99
+            #
+            # '\s?' at the start handles ^L form feed characters that
+            #  sometimes arise.
+            r'^\s?(\d{2}/\d{2}/\d{2})\*? (.*?)\s('+AMOUNT+r')\b',
             _transaction, contents)
 
     return balance, closing_date, transactions
