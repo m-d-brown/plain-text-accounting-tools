@@ -206,17 +206,22 @@ def CapitalOneBank(filename):
     """
     contents = PDFToText(filename)
 
+    overall = compileRE(
+            r'\w+ \d+ - (?P<closing>\w+ \d+, \d+)\b').search(contents)
+    if overall is None:
+        raise ValueError(f'could not find closing date')
+    closing_date = parser.parse(overall.group('closing')).date()
+
     section_expr = compileRE(
             r'^.?(?:\w| )+ - (?P<acct_num>\d+)\b'
             r'.*?'
             r'(?:\w+ \d+) Opening Balance '+AMOUNT+r'\b'
             r'(?P<transactions>.*?)\b'
-            r'(?P<closing>\w+ \d+) Closing Balance (?P<balance>'+AMOUNT+r')\b')
+            r'(?:\w+ \d+) Closing Balance (?P<balance>'+AMOUNT+r')\b')
 
     accounts = []
     for section in section_expr.finditer(contents):
         balance = pdf.ParseAmount(section.group('balance'))
-        closing_date = parser.parse(section.group('closing')).date()
 
         # Captures the closing_date variable so defined in the loop
         def _transaction(match):

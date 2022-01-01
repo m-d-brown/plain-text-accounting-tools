@@ -1,3 +1,4 @@
+import datetime
 import io
 
 # TODO: use internal types for balances so that the core parsing doesn't
@@ -33,13 +34,16 @@ def ParseAmount(s, currency='USD'):
 def AdjustDateForYearBoundary(to_adjust, latest_date):
     """Handles end-of-year boundaries for dates that are parsed from strings
     that don't include the year. latest_date is the latest date known from
-    processing an input. If to_adjust is after latest_date, to_adjust is
-    moved back a year.
+    processing an input. If to_adjust is after latest_date, to_adjust is moved
+    back a year. to_adjust is assumed to occur within the year preceding
+    latest_date.
 
     For example, an input may have dates 12/31 and 01/01. This crosses the
     year boundary so 01/01 is year X and 12/31 is year X-1.
     """
-    if to_adjust <= latest_date:
-        return to_adjust
-    return to_adjust.replace(year=to_adjust.year-1)
+    if to_adjust > latest_date:
+        to_adjust = to_adjust.replace(year=latest_date.year)
+    if to_adjust > latest_date:
+        to_adjust = to_adjust.replace(year=to_adjust.year-1)
+    return to_adjust
 
