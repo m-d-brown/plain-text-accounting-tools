@@ -109,18 +109,20 @@ class BankOfAmericaBank(importer.ImporterProtocol):
 
 class BankOfAmericaCreditCard(importer.ImporterProtocol):
 
-    def __init__(self, account, account_no):
+    def __init__(self, account, account_numbers):
         """Creates an importer for a Bank of America credit card.
 
         account is the string account name to which one side of
         transactions should be recorded. Should be a liability account.
 
-        account_no is the string number of the account, formatted like
-        '1234 5678 9012 3456'. It's used to ensure only files belonging
-        to this account are imported.
+        account_numbers is a list of the string numbers of the account,
+        formatted like '1234 5678 9012 3456'. It's used to ensure only files
+        belonging to this account are imported.
         """
         self.account = account
-        self.account_no = account_no
+        if isinstance(account_numbers, str):
+            account_numbers = [account_numbers]
+        self.account_numbers = set(account_numbers)
 
     def identify(self, f):
         if not re.match(parsers.BANK_OF_AMERICA_CREDIT_CARD_FILE_PATTERN, os.path.basename(f.name)):
@@ -129,7 +131,7 @@ class BankOfAmericaCreditCard(importer.ImporterProtocol):
             num, _, _, _ = parsers.BankOfAmericaCreditCard(f.name)
         except ValueError:
             return False
-        return num == self.account_no
+        return num in self.account_numbers
 
     def file_account(self, f):
         return self.account
