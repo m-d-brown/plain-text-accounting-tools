@@ -17,6 +17,10 @@ The repository contains:
 * **[ofx_pretty](#ofx_pretty)** to prettify OFX files.
 * **[financial-pdf-parsing](#financial-pdf-parsing)** to extract transactions
   from PDF financial statements.
+   * [beancount configuration](#example-beancount-importpy) to demonstrate use
+     with beancount.
+   * [beancount-import configuration](#integrating-with-beancount-import) to
+     demonstrate use with beancount-import.
 
 ## vanguard_pdf_to_txns
 
@@ -149,6 +153,41 @@ It's run as:
 
 ```console
 $ ./import.py --downloads ~/Downloads extract -e ledger.bean > update.bean
+```
+
+### Integrating with beancount-import
+
+The importers can be used with beancount-import using its `generic_importer_source`.
+
+```python
+...
+
+from financial_pdf_parsing import beancount as fin_importers
+
+...
+
+beancount_import.webserver.main(
+  ...
+  data_sources=[
+    dict(
+        module='beancount_import.source.generic_importer_source',
+        importer=fin_importers.AmericanExpressCC('Liabilities:Amex:BlueCash'),
+        account='Liabilities:Amex:BlueCash',
+        directory=os.path.join(data_dir, 'AmexBlueCash'),
+    ),
+    dict(
+        module='beancount_import.source.generic_importer_source',
+        importer=fin_importers.ChaseCC(
+            'Liabilities:Chase:AmazonPrime',
+            'Assets:Chase:AmazonPrimeRewards',
+            'AMAZONREWARDS',
+        ),
+        account='Liabilities:Chase:AmazonPrime',
+        directory=os.path.join(data_dir, 'Chase-AmazonPrime'),
+    ),
+    ...
+  ])
+
 ```
 
 ### Regression test preparation
