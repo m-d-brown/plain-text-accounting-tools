@@ -151,10 +151,6 @@ It's run as:
 $ ./import.py --downloads ~/Downloads extract -e ledger.bean > update.bean
 ```
 
-https://github.com/m-d-brown/beancount-basics has
-more information about Beancount, with links to many better resources to
-get started with it and double entry accounting.
-
 ### Regression test preparation
 
 Beancount regression test PDF files are created by running `pdftotext` on
