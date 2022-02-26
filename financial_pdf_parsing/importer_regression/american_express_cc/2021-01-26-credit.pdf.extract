@@ -1,0 +1,23 @@
+
+2020-12-26 * "CHARITY NEW YORK NY +12345678901"
+  Liabilities:Amex:BlueCash  -15.00 USD
+
+2021-01-02 * "WHOLEFDS ABC 12345 0000001 SF CA 4081234567"
+  Liabilities:Amex:BlueCash  -7.86 USD
+
+2021-01-05 * "GOOGLE*GOOGLE PAYMENT G.CO# GOODS/SERVICES"
+  Liabilities:Amex:BlueCash  -0.99 USD
+
+2021-01-06 * "WHOLEFDS DEF 23456 0000001 SF CA 4081234568"
+  Liabilities:Amex:BlueCash  -8.30 USD
+
+2021-01-12 * "JOHN DOE AUTOPAY PAYMENT RECEIVED - THANK YOU ADZUKI BANK"
+  Liabilities:Amex:BlueCash  111.48 USD
+
+2021-01-23 * "PHOTOGPHY PLAN NEW YORK NY PHOTO.LY/URL"
+  Liabilities:Amex:BlueCash  -1.99 USD
+
+2021-01-26 * "JOHN DOE ANNUAL MEMBERSHIP FEE"
+  Liabilities:Amex:BlueCash  -0.95 USD
+
+2021-01-27 balance Liabilities:Amex:BlueCash                       64.91 USD

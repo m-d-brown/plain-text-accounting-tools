@@ -24,6 +24,9 @@ def ParseAmount(s, currency='USD'):
     elif s.startswith('- $'):
         s = s[3:]
         invert = True
+    elif s.startswith('CR$'):
+        s = s[3:]
+        invert = True
     elif s[0] == "$":
         s = s[1:]
     a = amount.Amount(number.D(s), currency)

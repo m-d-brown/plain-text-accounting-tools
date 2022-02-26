@@ -18,7 +18,7 @@ Transaction = collections.namedtuple('Transaction', 'date descr amount')
 
 # A common pattern for dollar amounts.
 # Allows for a space after the negative sign, like '- $65.71'.
-AMOUNT = r'(?:-|- )?\$?[0-9,]+\.[0-9]{1,2}'
+AMOUNT = r'(?:-|- |CR)?\$?[0-9,]+\.[0-9]{1,2}'
 
 def compileRE(pattern):
     return re.compile(pattern, re.DOTALL|re.MULTILINE)
@@ -52,7 +52,7 @@ def RemoveNewlines(string):
 
 ################################################################
 
-AMERICAN_EXPRESS_CC_FILE_PATTERN =  r'^\d{4}-\d{2}-\d{2}\.pdf$'
+AMERICAN_EXPRESS_CC_FILE_PATTERN =  r'^\d{4}-\d{2}-\d{2}(.*)?\.pdf$'
 
 def AmericanExpressCC(filename):
     """Reads the PDF at filename and returns contents.
