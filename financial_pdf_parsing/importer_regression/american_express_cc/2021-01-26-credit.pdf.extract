@@ -1,4 +1,7 @@
 
+2020-01-26 * "JOHN DOE ANNUAL MEMBERSHIP FEE"
+  Liabilities:Amex:BlueCash  -0.95 USD
+
 2020-12-26 * "CHARITY NEW YORK NY +12345678901"
   Liabilities:Amex:BlueCash  -15.00 USD
 
@@ -17,7 +20,4 @@
 2021-01-23 * "PHOTOGPHY PLAN NEW YORK NY PHOTO.LY/URL"
   Liabilities:Amex:BlueCash  -1.99 USD
 
-2021-01-26 * "JOHN DOE ANNUAL MEMBERSHIP FEE"
-  Liabilities:Amex:BlueCash  -0.95 USD
-
-2021-01-27 balance Liabilities:Amex:BlueCash                       64.91 USD
+2021-01-26 balance Liabilities:Amex:BlueCash                       64.91 USD

@@ -20,6 +20,8 @@ Transaction = collections.namedtuple('Transaction', 'date descr amount')
 # Allows for a space after the negative sign, like '- $65.71'.
 AMOUNT = r'(?:-|- |CR)?\$?[0-9,]+\.[0-9]{1,2}'
 
+ONE_DAY = datetime.timedelta(days=1)
+
 def compileRE(pattern):
     return re.compile(pattern, re.DOTALL|re.MULTILINE)
 
@@ -72,7 +74,7 @@ def AmericanExpressCC(filename):
             _balance, contents)
 
     def _closing(match):
-        return parser.parse(match.group(1)).date()
+        return parser.parse(match.group(1)).date() - ONE_DAY
     closing_date = reduceSingleMatch(
             r'\bClosing Date (\d+/\d+/\d+)\b',
             _closing, contents)
@@ -171,7 +173,7 @@ def BankOfAmericaCreditCard(filename):
             _balance, contents)
 
     def _closing(match):
-        return parser.parse(match.group(1)).date()
+        return parser.parse(match.group(1)).date() - ONE_DAY
     closing_date = reduceSingleMatch(
             r'\bStatement Closing Date (\d+/\d+/\d+)\b',
             _closing, contents)
